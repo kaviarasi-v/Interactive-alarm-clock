@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Alarm Clock</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #f0f4f8;
+      --text-color: #1e2a38;
+      --card-bg: #ffffff;
+      --accent-color: #3b82f6;
+      --alarm-color: #c0392b;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1e2a38;
+      --text-color: #f0f4f8;
+      --card-bg: #2c3e50;
+      --accent-color: #60a5fa;
+      --alarm-color: #e74c3c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: background-color 0.4s, color 0.4s;
+      position: relative;
+    }
+
+    .alarm-container {
+      background-color: var(--card-bg);
+      padding: 35px 25px; /* Reduced padding for tighter layout */
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      transition: background-color 0.4s;
+    }
+
+    .alarm-container img {
+      width: 160px; /* Increased image size */
+      margin-bottom: 10px; /* Reduced gap below image */
+      margin-top: -10px; /* Move image closer to top */
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: 2rem;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 15px 0;
+      width: 220px;
+      border: 1px solid var(--accent-color);
+      border-radius: 6px;
+      text-align: center;
+      background-color: #fff;
+      color: #000;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #offButton {
+      display: none;
+      background-color: var(--alarm-color);
+      margin-top: 15px;
+    }
+
+    .toggle-theme {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      color: var(--text-color);
+      border: 1px solid var(--accent-color);
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.3s, border-color 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="toggle-theme" onclick="toggleTheme()">Toggle Theme</button>
+
+  <div class="alarm-container">
+    <img src="{{url_for('static',filename='alarm-clock.png')}}" alt="Alarm Clock">
+    <h1>Alarm Clock</h1>
+    <p>Set Time (HH:MM:SS)</p>
+    <input type="text" id="alarmTime" placeholder="HH:MM:SS">
+    <br>
+    <button onclick="setAlarm()">Set Alarm</button>
+    <p id="status"></p>
+    <button id="offButton" onclick="turnOffAlarm()">Turn Off</button>
+    <audio id="alarmSound" loop>
+      <source src="{{url_for('static',filename='alarm.mp3')}}"type="audio/mpeg">
+    </audio>
+  </div>
+
+  <script>
+    let alarmInterval = null;
+
+    function setAlarm() {
+      const alarmTime = document.getElementById("alarmTime").value.trim();
+      const status = document.getElementById("status");
+
+      if (!/^\d{2}:\d{2}:\d{2}$/.test(alarmTime)) {
+        status.textContent = "⛔ Please enter time in HH:MM:SS format.";
+        return;
+      }
+
+      status.textContent = "✅ Alarm set for " + alarmTime;
+
+      alarmInterval = setInterval(() => {
+        const now = new Date();
+        const currentTime = now.toTimeString().slice(0, 8);
+        if (currentTime === alarmTime) {
+          document.getElementById("status").textContent = "⏰ Wake up!";
+          document.getElementById("alarmSound").play();
+          document.getElementById("offButton").style.display = "inline-block";
+          clearInterval(alarmInterval);
+        }
+      }, 1000);
+    }
+
+    function turnOffAlarm() {
+      const alarm = document.getElementById("alarmSound");
+      alarm.pause();
+      alarm.currentTime = 0;
+      document.getElementById("status").textContent = "🔕 Alarm stopped.";
+      document.getElementById("offButton").style.display = "none";
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === "light" ? "dark" : "light";
+    }
+  </script>
+
+</body>
+</html>
